@@ -1,0 +1,50 @@
+version: '3'
+services:
+
+  mongodb:
+    image: mongo
+    ports:
+      - 27017:27017
+
+  tweet_collector:
+    build: tweet_collector/
+    depends_on:
+      - mongodb
+    env_file:
+      - ./tweet_collector/.env
+
+  postgresdb:
+    image: postgres
+    ports:
+    - 5555:5432
+    environment:
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    - POSTGRES_DB=tweets_db
+
+  etl_job:
+    build: etl_job/
+    depends_on:
+      - mongodb
+      - postgresdb
+      - tweet_collector
+
+  slack_bot:
+    build: slack_bot/
+    depends_on:
+      - postgresdb
+      - etl_job
+      - tweet_collector
+    env_file:
+      - ./slack_bot/.env
+
+  spotipy_client:
+    build: spotipy_client/
+    depends_on:
+      - mongodb
+    env_file:
+      - ./spotipy_client/.env
+
+# In case you wish to use shared volumes. You can use database as the shared volume with the command below:
+#volumes:
+#  database: {}

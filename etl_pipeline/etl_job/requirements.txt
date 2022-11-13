@@ -1,0 +1,5 @@
+sqlalchemy
+pymongo
+python-dotenv
+psycopg2-binary
+vaderSentiment
